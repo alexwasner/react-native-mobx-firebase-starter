@@ -1,4 +1,4 @@
-#React Native MobX Firebase Starter
+# React Native MobX Firebase Starter
 
 A React Native starter app with Wix React Native Navigation V2, MobX and Firebase
 
