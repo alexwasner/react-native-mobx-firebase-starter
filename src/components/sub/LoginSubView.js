@@ -12,6 +12,10 @@ import Loader from '../theme/Loader'
 @inject('appState')
 @observer
 export default class LoginSubView extends Component {
+	constructor() {
+		super()
+		this.state = {}
+	}
 	render() {
 		return (
 			<View style={styles.inputContainer}>

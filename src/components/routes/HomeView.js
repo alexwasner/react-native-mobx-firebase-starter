@@ -1,12 +1,14 @@
 import React, { Component } from 'react';
 import {
+  Image,
   Text,
   View,
 } from 'react-native';
-import styles from '../../styles/HomeStyles'
 import { inject, observer } from 'mobx-react'
-import Button from '../theme/ButtonView'
 import { Navigation } from 'react-native-navigation'
+import Button from '../theme/ButtonView'
+import { Icons, Images } from '../../styles/theme'
+import styles from '../../styles/HomeStyles'
 
 @inject('appState')
 @observer
@@ -36,11 +38,13 @@ export default class HomeView extends Component {
     return (
       <View style={styles.bar}>
         <View style={styles.root}>
+          <Image source={Images.rnn}/>
           <Button title='Switch to tab based app' onPress={this.onClickSwitchToTabs} />
           <Button title='Register' onPress={this.onClickPush('App.Register')} />
           <Button title='Login' onPress={this.onClickPush('App.Login')} />
           <Button title='Show Modal' onPress={this.showModal} />
           <Text style={styles.footer}>{`this.props.componentId = ${this.props.componentId}`}</Text>
+          {this.props.text ? (<Text style={styles.footer}>{this.props.text}</Text>) : false}
         </View>
       </View>
     );
@@ -66,18 +70,13 @@ export default class HomeView extends Component {
                       options: {
                         bottomTab: {
                           text: 'Tab 1',
-                          icon: require('../../assets/images/one.png'),
-                          selectedIcon: require('../../assets/images/one.png'),
+                          icon: Icons.one,
+                          selectedIcon: Icons.oneSelected,
                         }
                       }
                     }
                   }
-                ],
-                options: {
-                  topBar: {
-                    visible: false
-                  }
-                }
+                ]
               }
             },
             {
@@ -87,15 +86,16 @@ export default class HomeView extends Component {
                     component: {
                       name: 'App.Home',
                       passProps: {
-                        text: 'This is tab 2'
+                        text: 'This is tab 2',
                       }
-                    }
+                    },
                   }
                 ],
                 options: {
                   bottomTab: {
                     text: 'Tab 2',
-                    icon: require('../../assets/images/two.png'),
+                    icon: Icons.two,
+                    selectedIcon: Icons.twoSelected,
                   }
                 }
               }
@@ -110,12 +110,12 @@ export default class HomeView extends Component {
                 options: {
                   topBar: {
                     visible: true,
-                    animate: false
+                    animate: false,
                   },
                   bottomTab: {
                     text: 'Tab 3',
-                    icon: require('../../assets/images/one.png'),
-                    selectedIcon: require('../../assets/images/one.png')
+                    icon: Icons.three,
+                    selectedIcon: Icons.threeSelected,
                   }
                 }
               }
