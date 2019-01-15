@@ -1,0 +1,32 @@
+{
+  "database": {
+    "rules": "database.rules.json"
+  }
+  // },
+  // "hosting": {
+  //   "public": "admin/build",
+  //   "headers": [
+  //     {
+  //       "source": "**/*.@(css|html|js|map)",
+  //       "headers": [
+  //         {"key": "Cache-Control", "value": "max-age=60"}
+  //       ]
+  //     }
+  //   ],
+  //   "cleanUrls": true,
+  //   "rewrites": [
+  //     {
+  //       "source": "**",
+  //       "destination": "/index.html"
+  //     },
+  //     {
+  //       "source": "add/**",
+  //       "destination": "/index.html"
+  //     },
+  //     {
+  //       "source": "admin/**",
+  //       "destination": "/index.html"
+  //     }
+  //   ]
+  // }
+}

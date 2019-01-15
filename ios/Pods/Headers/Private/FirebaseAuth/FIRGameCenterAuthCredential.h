@@ -1,0 +1,1 @@
+../../../FirebaseAuth/Firebase/Auth/Source/AuthProviders/GameCenter/FIRGameCenterAuthCredential.h

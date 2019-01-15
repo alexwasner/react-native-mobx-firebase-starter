@@ -1,0 +1,40 @@
+{
+  "name": "react-native-mobx-firebase-starter",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node node_modules/react-native/local-cli/cli.js start",
+    "test": "jest",
+    "postinstall": "cd node_modules/react-native/React/..; exec ./scripts/ios-install-third-party.sh"
+  },
+  "dependencies": {
+    "autobind-decorator": "^1.4.1",
+    "axios": "^0.15.3",
+    "firebase": "^4.4.0",
+    "lottie-react-native": "^2.5.6",
+    "metro-react-native-babel-preset": "^0.51.1",
+    "mobx": "^5.8.0",
+    "mobx-react": "^5.4.3",
+    "mobx-react-devtools": "^4.2.13",
+    "package": "^1.0.1",
+    "prop-types": "^15.6.1",
+    "react": "16.6.3",
+    "react-native": "0.57.8",
+    "react-native-fetch-polyfill": "^1.1.2",
+    "react-native-firebase": "^5.2.0",
+    "react-native-keyboard-aware-scroll-view": "^0.7.2",
+    "react-native-keyboard-spacer": "^0.4.1",
+    "react-native-linear-gradient": "^2.4.0",
+    "react-native-navigation": "^2.6.0",
+    "react-test-renderer": "16.6.3"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "@babel/plugin-proposal-class-properties": "^7.2.3",
+    "@babel/plugin-proposal-decorators": "^7.2.3"
+  
+  },
+  "jest": {
+    "preset": "react-native"
+  }
+}
