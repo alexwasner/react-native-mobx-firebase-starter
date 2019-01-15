@@ -9,6 +9,7 @@ Copy `GoogleService-Info.plist` to overwrite the placeholder file in the `ios` f
 
 Copy `google-services.json` to overwrite the placeholder file in the `android/app` folder.
 
+Add the project name to `.firebaserc` on `line 3`
 
 __Install Node Packages__
 ```bash
