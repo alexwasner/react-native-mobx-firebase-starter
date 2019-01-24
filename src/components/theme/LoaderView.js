@@ -7,15 +7,15 @@
 import React, { Component } from 'react'
 import {
   Animated,
-  StyleSheet,
   Easing,
   View
 } from 'react-native'
 import { Icons } from '../../styles/theme'
 import Animation from 'lottie-react-native';
 import LOADER_JSON from '../../assets/lottie/loading-circle.json'
+import styles from '../../styles/theme/LoaderViewStyles'
 
-export default class Loader extends Component {
+export default class LoaderView extends Component {
   constructor(props) {
     super(props)
     this.animation = new Animated.Value(0)
@@ -37,9 +37,9 @@ export default class Loader extends Component {
   }
 
   render() {
-    return (<View style={loader.loadingContainer}>
+    return (<View style={styles.loadingContainer}>
       <Animation
-        style={[loader.loadingContainer, this.props.style]}
+        style={[styles.loadingContainer, this.props.style]}
         loop={true}
         source={LOADER_JSON}
         progress={this.animation.interpolate({
@@ -64,12 +64,3 @@ export default class Loader extends Component {
   }
 
 }
-
-let loader = StyleSheet.create({
-  loadingContainer: {
-    width: 44,
-    height: 44,
-    justifyContent: 'center',
-    alignItems: 'center'
-  }
-})

@@ -1,7 +1,7 @@
 import {
 	StyleSheet
 } from 'react-native';
-import Theme from './theme'
+import Theme from '../theme'
 export default StyleSheet.create({
 	container: {
 		flex: 1,
