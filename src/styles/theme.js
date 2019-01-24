@@ -15,15 +15,14 @@ export const ScreenOffsets = {
   top: safeTop,
   left: 0,
   bottom: safeBottom,
-  right: 0
+  right: 0,
 }
 
 export default {
   backgroundColor: '#f5f4fc',
 
   grey: '#333745',
-  greyDark: '#292c37',
-
+  linkColor: '#4b87a7',
   border: '#d3d8db',
   padding:20,
   cloudHeight:200,
@@ -34,6 +33,6 @@ export default {
     shadowOpacity: 0.3,
     shadowOffset: { width: 0, height: 4 },
     shadowRadius: 10,
-    backgroundColor: '#f1f4f7'
+    backgroundColor: '#f1f4f7',
   },
 }

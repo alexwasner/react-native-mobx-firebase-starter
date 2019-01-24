@@ -2,9 +2,9 @@ import React, { Component } from 'react';
 import {
   View,
 } from 'react-native';
-import styles from '../../styles/LoginStyles'
+import styles from '../../styles/routes/LoginViewStyles'
 import {inject, observer} from 'mobx-react'
-import LoginSubView from '../sub/LoginSubView'
+import LoginSubView from '../theme/LoginSubView'
 import { Navigation } from 'react-native-navigation'
 
 @inject ('user')
@@ -14,7 +14,7 @@ export default class LoginView extends Component {
     return {
       topBar: {
         title: {
-          text: 'Login'
+          text: 'Login',
         },
       }
     };
@@ -23,7 +23,7 @@ export default class LoginView extends Component {
   constructor() {
     super();
     this.state = {
-      loading: false
+      loading: false,
     }
   }
 

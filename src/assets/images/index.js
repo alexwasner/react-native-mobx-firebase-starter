@@ -1,5 +1,5 @@
 export default {
-	rnn: require('./RNN.png')
+	logo: require('./logo.png')
 }
 
 

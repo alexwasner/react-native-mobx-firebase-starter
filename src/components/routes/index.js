@@ -1,17 +1,25 @@
 import React from 'react';
 import { Navigation } from 'react-native-navigation';
-import Home from './HomeView';
+import { observer } from 'mobx-react'
+import Provider from '../../utils/Provider'
+import stores from '../../stores';
+
+//Route Imports
+import HomeView from './HomeView';
 import LoginView from './LoginView';
 import RegisterView from './RegisterView';
-import stores from '../../stores';
-import Provider from '../../utils/Provider'
-import { observer } from 'mobx-react'
 
-// register all screens of the app (including internal ones)
+export default routes = {
+  'App.Home': HomeView,
+  'App.Login': LoginView,
+  'App.Register': RegisterView,
+}
+
+// Register all screens of the app (including internal ones)
 export function registerScreens() {
-  Navigation.registerComponent('App.Home', () => sceneCreator(Home, stores)),
-  Navigation.registerComponent('App.Login', () => sceneCreator(LoginView, stores)),
-  Navigation.registerComponent('App.Register', () => sceneCreator(RegisterView, stores))
+  for (let r in routes) {
+    Navigation.registerComponent(r, () => sceneCreator(routes[r], stores))
+  }
 }
   
 

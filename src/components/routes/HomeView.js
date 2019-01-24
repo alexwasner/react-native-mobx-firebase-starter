@@ -8,7 +8,7 @@ import { inject, observer } from 'mobx-react'
 import { Navigation } from 'react-native-navigation'
 import Button from '../theme/ButtonView'
 import { Icons, Images } from '../../styles/theme'
-import styles from '../../styles/HomeStyles'
+import styles from '../../styles/routes/HomeViewStyles'
 
 @inject('appState')
 @observer
@@ -18,18 +18,18 @@ export default class HomeView extends Component {
       _statusBar: {
         backgroundColor: 'transparent',
         style: 'dark',
-        drawBehind: true
+        drawBehind: true,
       },
       topBar: {
         title: {
-          text: 'Home'
+          text: 'Home',
         },
         largeTitle: {
           visible: true,
         },
         drawBehind: true,
         visible: true,
-        animate: true
+        animate: true,
       }
     };
   }
@@ -38,7 +38,7 @@ export default class HomeView extends Component {
     return (
       <View style={styles.bar}>
         <View style={styles.root}>
-          <Image source={Images.rnn}/>
+          <Image source={Images.logo}/>
           <Button title='Switch to tab based app' onPress={this.onClickSwitchToTabs} />
           <Button title='Register' onPress={this.onClickPush('App.Register')} />
           <Button title='Login' onPress={this.onClickPush('App.Login')} />
@@ -65,7 +65,7 @@ export default class HomeView extends Component {
                       name: 'App.Home',
                       passProps: {
                         text: 'This is tab 1',
-                        myFunction: () => 'Hello from a function!'
+                        myFunction: () => 'Hello from a function!',
                       },
                       options: {
                         bottomTab: {
@@ -105,7 +105,7 @@ export default class HomeView extends Component {
                 name: 'App.Home',
                 passProps: {
                   text: 'This is tab 3',
-                  myFunction: () => 'Hello from a function!'
+                  myFunction: () => 'Hello from a function!',
                 },
                 options: {
                   topBar: {
@@ -145,7 +145,7 @@ export default class HomeView extends Component {
         children: [
           {
             component: {
-              name: 'App.Home'
+              name: 'App.Home',
             }
           }
         ]

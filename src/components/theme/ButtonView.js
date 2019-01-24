@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-const PropTypes = require('prop-types');
-const { Platform, ColorPropType, StyleSheet, TouchableNativeFeedback, TouchableOpacity, View, Text } = require('react-native');
-const { Navigation } = require('react-native-navigation');
+import PropTypes from 'prop-types';
+import { Platform, ColorPropType, TouchableNativeFeedback, TouchableOpacity, View, Text } from 'react-native';
+import { Navigation } from 'react-native-navigation';
+import styles from '../../styles/theme/ButtonViewStyles'
 
-class Button extends Component {
-
+export default class ButtonView extends Component {
   static propTypes = {
     title: PropTypes.string.isRequired,
     accessibilityLabel: PropTypes.string,
@@ -73,45 +73,3 @@ class Button extends Component {
     );
   }
 }
-
-const styles = StyleSheet.create({
-  button: Platform.select({
-    ios: {},
-    android: {
-      elevation: 4,
-      backgroundColor: '#2196F3',
-      borderRadius: 2,
-    },
-  }),
-  text: Platform.select({
-    ios: {
-      color: '#007AFF',
-      textAlign: 'center',
-      padding: 8,
-      fontSize: 18,
-    },
-    android: {
-      color: 'white',
-      textAlign: 'center',
-      padding: 8,
-      fontWeight: '500',
-    },
-  }),
-  buttonDisabled: Platform.select({
-    ios: {},
-    android: {
-      elevation: 0,
-      backgroundColor: '#dfdfdf',
-    },
-  }),
-  textDisabled: Platform.select({
-    ios: {
-      color: '#cdcdcd',
-    },
-    android: {
-      color: '#a1a1a1',
-    },
-  }),
-});
-
-module.exports = Button;

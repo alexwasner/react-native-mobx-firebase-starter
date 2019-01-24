@@ -5,9 +5,9 @@ import {
 	Text
 } from 'react-native';
 import { inject, observer } from 'mobx-react'
-import styles from '../../styles/LoginStyles'
+import styles from '../../styles/routes/LoginViewStyles'
 import DebouncedTouchableOpacity from '../theme/DebouncedTouchableOpacity'
-import Loader from '../theme/Loader'
+import LoaderView from './LoaderView'
 
 @inject('appState')
 @observer
@@ -45,7 +45,7 @@ export default class LoginSubView extends Component {
 						onSubmitEditing={() => { }} />
 				</View>
 				<View style={styles.centerItems}>
-					{this.props.loading ? (<Loader/>) : (<DebouncedTouchableOpacity style={styles.submitButton} onPress={()=>this.props.onSubmit(this.state.email, this.state.password)}>
+					{this.props.loading ? (<LoaderView/>) : (<DebouncedTouchableOpacity style={styles.submitButton} onPress={()=>this.props.onSubmit(this.state.email, this.state.password)}>
 						<Text>SUBMIT</Text>
 					</DebouncedTouchableOpacity>)}
 				</View>
