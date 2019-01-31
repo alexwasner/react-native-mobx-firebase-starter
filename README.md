@@ -19,6 +19,7 @@ Also includes a default [Firebase Cloud Function](https://firebase.google.com/do
 
 <br/>
 <h4 align="center" style="color:red;">👇👇👇 DO THIS BEFORE RUNNING 👇👇👇</h4>
+
 ## ✅ Setup  
 
 ### 🔥 Setup Firebase
