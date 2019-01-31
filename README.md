@@ -44,13 +44,13 @@ $ firebase deploy --only functions
 $ yarn
 ```
 
-♻️__Change the project name__  
+♻️ __Change the project name__  
 If you want to easily rename the project, you can do so with [React Native Rename](https://github.com/junedomingo/react-native-rename) and use it like:  
 ```bash
 $ react-native-rename <newName>
 ```
 
-📲__Run React Native Simulator__  
+📲 __Run React Native Simulator__  
 ```bash
 $ react-native run-ios  
 or  
