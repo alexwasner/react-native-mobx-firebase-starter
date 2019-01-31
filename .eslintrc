@@ -1,0 +1,70 @@
+{
+  "root": true,
+  "parser": "babel-eslint",
+  "env": {
+    "es6": true,
+    "jest": true,
+    "node": true,
+    "react-native/react-native": true
+  },
+  "extends": [
+    "airbnb",
+    "plugin:flowtype/recommended"
+  ],
+  "plugins": [
+    "eslint-comments",
+    "flowtype",
+    "prettier",
+    "react",
+    "react-native",
+    "jest"
+  ],
+  "globals": {
+    "fetch": true,
+    "window": true,
+    "__DEV__": true,
+    "navigator": true,
+    "ReactElement": true,
+    "requestAnimationFrame": true,
+    "jest": true,
+    "Iterable": true,
+    "Action": true,
+    "FormData": true
+  },
+  "settings": {
+    "flowtype": {
+      "onlyFilesWithFlowAnnotation": true
+    }
+  },
+  "rules": {
+    "comma-dangle": 0,
+    "indent": [2, 2, {"SwitchCase": 1}],
+    "no-console": 0,
+    "camelcase": 0,
+    "no-return-assign": 0,
+    "arrow-body-style": 0,
+    "no-nested-ternary": 0,
+    "import/extensions": 0,
+    "import/no-unresolved": 0,
+    "import/prefer-default-export": 0,
+    "global-require": "off",
+    "prefer-promise-reject-errors": "off",
+    "padded-blocks": "off",
+    "react/no-typos": "off",
+    "no-underscore-dangle": "warn",
+    "react/destructuring-assignment": "off",
+    "react/prop-types": ["error", { "ignore": ["componentId"] }],
+    "react/jsx-curly-brace-presence": 0,
+    "react/jsx-wrap-multilines": "off",
+    "react/jsx-boolean-value": 0,
+    "react/sort-comp": 0,
+    "react/react-in-jsx-scope": 0,
+    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
+    "react-native/no-unused-styles": 2
+  },
+  "parserOptions": {
+    "ecmaFeatures": {
+      "legacyDecorators": true
+    }
+  }
+}

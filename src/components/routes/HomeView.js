@@ -6,6 +6,7 @@ import {
 } from 'react-native';
 import { inject, observer } from 'mobx-react'
 import { Navigation } from 'react-native-navigation'
+import LinearGradient from 'react-native-linear-gradient'
 import Button from '../theme/ButtonView'
 import { Icons, Images } from '../../styles/theme'
 import styles from '../../styles/routes/HomeViewStyles'
@@ -37,15 +38,19 @@ export default class HomeView extends Component {
   render() {
     return (
       <View style={styles.bar}>
-        <View style={styles.root}>
-          <Image source={Images.logo}/>
+        <LinearGradient
+          colors={['#fac0fa', '#ffdea6', '#b9ecaf']}
+          locations={[0.15, 0.48, 1]}
+          style={styles.root}
+        >
+          <Image source={Images.logo}/> 
           <Button title='Switch to tab based app' onPress={this.onClickSwitchToTabs} />
           <Button title='Register' onPress={this.onClickPush('App.Register')} />
           <Button title='Login' onPress={this.onClickPush('App.Login')} />
           <Button title='Show Modal' onPress={this.showModal} />
           <Text style={styles.footer}>{`this.props.componentId = ${this.props.componentId}`}</Text>
           {this.props.text ? (<Text style={styles.footer}>{this.props.text}</Text>) : false}
-        </View>
+        </LinearGradient>
       </View>
     );
   }
