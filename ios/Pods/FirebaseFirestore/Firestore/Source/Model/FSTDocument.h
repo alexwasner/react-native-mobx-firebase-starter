@@ -18,22 +18,26 @@
 
 #include "Firestore/core/src/firebase/firestore/model/document_key.h"
 #include "Firestore/core/src/firebase/firestore/model/field_path.h"
+#include "Firestore/core/src/firebase/firestore/model/field_value.h"
 #include "Firestore/core/src/firebase/firestore/model/snapshot_version.h"
+#include "absl/types/optional.h"
 
-@class FSTFieldValue;
+@class GCFSDocument;
 @class FSTObjectValue;
 
-NS_ASSUME_NONNULL_BEGIN
+namespace firebase {
+namespace firestore {
+namespace model {
 
-/** Describes the `hasPendingWrites` state of a document. */
-typedef NS_ENUM(NSInteger, FSTDocumentState) {
-  /** Local mutations applied via the mutation queue. Document is potentially inconsistent. */
-  FSTDocumentStateLocalMutations,
-  /** Mutations applied based on a write acknowledgment. Document is potentially inconsistent. */
-  FSTDocumentStateCommittedMutations,
-  /** No mutations applied. Document was sent to us by Watch. */
-  FSTDocumentStateSynced
-};
+enum class DocumentState;
+
+}  // namespace model
+}  // namespace firestore
+}  // namespace firebase
+
+namespace model = firebase::firestore::model;
+
+NS_ASSUME_NONNULL_BEGIN
 
 /**
  * The result of a lookup for a given path may be an existing document or a tombstone that marks
@@ -41,45 +45,54 @@ typedef NS_ENUM(NSInteger, FSTDocumentState) {
  */
 @interface FSTMaybeDocument : NSObject <NSCopying>
 - (id)init __attribute__((unavailable("Abstract base class")));
-- (const firebase::firestore::model::DocumentKey &)key;
-- (const firebase::firestore::model::SnapshotVersion &)version;
+- (const model::DocumentKey &)key;
+- (const model::SnapshotVersion &)version;
 
 /**
  * Whether this document has a local mutation applied that has not yet been acknowledged by Watch.
  */
-- (BOOL)hasPendingWrites;
+- (bool)hasPendingWrites;
 
 @end
 
 @interface FSTDocument : FSTMaybeDocument
-+ (instancetype)documentWithData:(FSTObjectValue *)data
-                             key:(firebase::firestore::model::DocumentKey)key
-                         version:(firebase::firestore::model::SnapshotVersion)version
-                           state:(FSTDocumentState)state;
++ (instancetype)documentWithData:(model::ObjectValue)data
+                             key:(model::DocumentKey)key
+                         version:(model::SnapshotVersion)version
+                           state:(model::DocumentState)state;
 
-- (nullable FSTFieldValue *)fieldForPath:(const firebase::firestore::model::FieldPath &)path;
-- (BOOL)hasLocalMutations;
-- (BOOL)hasCommittedMutations;
++ (instancetype)documentWithData:(model::ObjectValue)data
+                             key:(model::DocumentKey)key
+                         version:(model::SnapshotVersion)version
+                           state:(model::DocumentState)state
+                           proto:(GCFSDocument *)proto;
 
-@property(nonatomic, strong, readonly) FSTObjectValue *data;
+- (absl::optional<model::FieldValue>)fieldForPath:(const model::FieldPath &)path;
+- (bool)hasLocalMutations;
+- (bool)hasCommittedMutations;
+
+@property(nonatomic, assign, readonly) const model::ObjectValue &data;
+@property(nonatomic, assign, readonly) model::DocumentState documentState;
+
+/**
+ * Memoized serialized form of the document for optimization purposes (avoids repeated
+ * serialization). Might be nil.
+ */
+@property(nullable, nonatomic, strong, readonly) GCFSDocument *proto;
 
 @end
 
 @interface FSTDeletedDocument : FSTMaybeDocument
-+ (instancetype)documentWithKey:(firebase::firestore::model::DocumentKey)key
-                        version:(firebase::firestore::model::SnapshotVersion)version
-          hasCommittedMutations:(BOOL)committedMutations;
++ (instancetype)documentWithKey:(model::DocumentKey)key
+                        version:(model::SnapshotVersion)version
+          hasCommittedMutations:(bool)committedMutations;
 
-- (BOOL)hasCommittedMutations;
+- (bool)hasCommittedMutations;
 
 @end
 
 @interface FSTUnknownDocument : FSTMaybeDocument
-+ (instancetype)documentWithKey:(firebase::firestore::model::DocumentKey)key
-                        version:(firebase::firestore::model::SnapshotVersion)version;
++ (instancetype)documentWithKey:(model::DocumentKey)key version:(model::SnapshotVersion)version;
 @end
-
-/** An NSComparator suitable for comparing docs using only their keys. */
-extern const NSComparator FSTDocumentComparatorByKey;
 
 NS_ASSUME_NONNULL_END

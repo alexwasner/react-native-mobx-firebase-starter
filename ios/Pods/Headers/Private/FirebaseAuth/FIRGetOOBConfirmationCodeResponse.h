@@ -1,1 +1,1 @@
-../../../FirebaseAuth/Firebase/Auth/Source/RPCs/FIRGetOOBConfirmationCodeResponse.h
+../../../FirebaseAuth/Firebase/Auth/Source/Backend/RPC/FIRGetOOBConfirmationCodeResponse.h

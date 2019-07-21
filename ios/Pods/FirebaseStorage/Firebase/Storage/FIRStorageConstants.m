@@ -46,6 +46,14 @@ NSString *const kFIRStorageInvalidObserverStatus =
     @"Complete, or Failure";
 
 /**
+ * String constants mapping GCS Object#list results to ListResult fields.
+ */
+NSString *const kFIRStorageListPrefixes = @"prefixes";
+NSString *const kFIRStorageListItems = @"items";
+NSString *const kFIRStorageListItemName = @"name";
+NSString *const kFIRStorageListPageToken = @"nextPageToken";
+
+/**
  * String constants mapping GCS Object#resource mappings to metadata fields.
  */
 NSString *const kFIRStorageMetadataBucket = @"bucket";
@@ -56,7 +64,6 @@ NSString *const kFIRStorageMetadataContentLanguage = @"contentLanguage";
 NSString *const kFIRStorageMetadataContentType = @"contentType";
 NSString *const kFIRStorageMetadataCustomMetadata = @"metadata";
 NSString *const kFIRStorageMetadataSize = @"size";
-NSString *const kFIRStorageMetadataDownloadURLs = @"downloadURLs";
 NSString *const kFIRStorageMetadataGeneration = @"generation";
 NSString *const kFIRStorageMetadataMetageneration = @"metageneration";
 NSString *const kFIRStorageMetadataTimeCreated = @"timeCreated";
@@ -82,5 +89,4 @@ NSString *const kFIRStorageBundleIdentifier = @"com.google.firebase.storage";
 // with a -D to be treated as a string instead of an invalid floating point value.
 #define STR(x) STR_EXPAND(x)
 #define STR_EXPAND(x) #x
-const unsigned char *const FIRStorageVersionString =
-    (const unsigned char *const)STR(FIRStorage_VERSION);
+const char *const FIRStorageVersionString = (const char *const)STR(FIRStorage_VERSION);

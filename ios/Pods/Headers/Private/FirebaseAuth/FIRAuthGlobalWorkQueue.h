@@ -1,1 +1,1 @@
-../../../FirebaseAuth/Firebase/Auth/Source/FIRAuthGlobalWorkQueue.h
+../../../FirebaseAuth/Firebase/Auth/Source/Auth/FIRAuthGlobalWorkQueue.h

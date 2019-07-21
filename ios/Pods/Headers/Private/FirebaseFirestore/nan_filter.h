@@ -1,0 +1,1 @@
+../../../FirebaseFirestore/Firestore/core/src/firebase/firestore/core/nan_filter.h

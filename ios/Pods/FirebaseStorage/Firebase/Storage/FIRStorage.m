@@ -158,11 +158,18 @@ static GTMSessionFetcherRetryBlock _retryWhenOffline;
   return self;
 }
 
+- (instancetype)init {
+  NSAssert(false, @"Storage cannot be directly instantiated, use "
+                   "Storage.storage() or Storage.storage(app:) instead");
+  return nil;
+}
+
 #pragma mark - NSObject overrides
 
 - (instancetype)copyWithZone:(NSZone *)zone {
-  FIRStorage *storage =
-      [[[self class] allocWithZone:zone] initWithApp:_app bucket:_storageBucket auth:_auth];
+  FIRStorage *storage = [[[self class] allocWithZone:zone] initWithApp:_app
+                                                                bucket:_storageBucket
+                                                                  auth:_auth];
   storage.callbackQueue = _callbackQueue;
   return storage;
 }

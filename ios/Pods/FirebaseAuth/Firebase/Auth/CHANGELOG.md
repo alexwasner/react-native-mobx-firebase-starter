@@ -1,3 +1,42 @@
+# v6.2.1
+- Add new client error MISSING_CLIENT_IDENTIFIER. (#3341)
+
+# v6.2.0
+- Expose `secret` of OAuth credential in public header. (#3089)
+- Fix a keychain issue where API key is incorrectly set. (#3239)
+
+# v6.1.2
+- Fix line limits and linter warnings in public documentation. (#3139)
+
+# v6.1.1
+- Fix an issue where a user can't link with email provider by email link. (#3030)
+
+# v6.1.0
+- Add support of web.app as an auth domain. (#2959)
+- Fix an issue where the return type of `getStoredUserForAccessGroup:error:` is nonnull. (#2879)
+
+# v6.0.0
+- Add support of single sign on. (#2684)
+- Deprecate `reauthenticateAndRetrieveDataWithCredential:completion:`, `signInAndRetrieveDataWithCredential:completion:`, `linkAndRetrieveDataWithCredential:completion:`, `fetchProvidersForEmail:completion:`. (#2723, #2756)
+- Returned oauth secret token in Generic IDP sign-in for Twitter. (#2663)
+- Remove pendingToken from public API. (#2676)
+- `GULAppDelegateSwizzler` is used for the app delegate swizzling. (#2591)
+
+# v5.4.2
+- Support new error code ERROR_INVALID_PROVIDER_ID. (#2629)
+
+# v5.4.1
+- Deprecate Microsoft and Yahoo OAuth Provider ID (#2517)
+- Fix an issue where an exception was thrown when linking OAuth credentials. (#2521)
+- Fix an issue where a wrong error was thrown when handling error with
+  FEDERATED_USER_ID_ALREADY_LINKED. (#2522)
+
+# v5.4.0
+- Add support of Generic IDP (#2405).
+
+# v5.3.0
+- Use the new registerInternalLibrary API to register with FirebaseCore. (#2137)
+
 # v5.2.0
 - Add support of Game Center sign in (#2127).
 

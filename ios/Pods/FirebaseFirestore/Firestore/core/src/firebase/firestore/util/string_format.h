@@ -21,6 +21,7 @@
 #include <string>
 #include <utility>
 
+#include "Firestore/core/src/firebase/firestore/objc/objc_type_traits.h"
 #include "Firestore/core/src/firebase/firestore/util/string_apple.h"
 #include "Firestore/core/src/firebase/firestore/util/type_traits.h"
 #include "absl/base/attributes.h"
@@ -53,7 +54,7 @@ struct FormatChoice<5> {};
  *
  * Chooses a conversion to a text form in this order:
  *   * If the value is exactly of `bool` type (without implicit conversions)
- *     the text will the "true" or "false".
+ *     the text will be "true" or "false".
  *   * If the value is of type `const char*`, the text will be the value
  *     interpreted as a C string. To show the address of a single char or to
  *     show the `const char*` as an address, cast to `void*`.
@@ -88,7 +89,7 @@ class FormatArg : public absl::AlphaNum {
    */
   template <
       typename T,
-      typename = typename std::enable_if<is_objective_c_pointer<T>{}>::type>
+      typename = typename std::enable_if<objc::is_objc_pointer<T>{}>::type>
   FormatArg(T object, internal::FormatChoice<1>)
       : AlphaNum{MakeStringView([object description])} {
   }

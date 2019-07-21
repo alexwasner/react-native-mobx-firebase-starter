@@ -16,15 +16,20 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 /** @class FIRAuthSettings
     @brief Determines settings related to an auth object.
  */
+NS_SWIFT_NAME(AuthSettings)
 @interface FIRAuthSettings : NSObject
 
 /** @property appVerificationDisabledForTesting
     @brief Flag to determine whether app verification should be disabled for testing or not.
  */
-@property (nonatomic, assign, getter=isAppVerificationDisabledForTesting) BOOL
+@property(nonatomic, assign, getter=isAppVerificationDisabledForTesting) BOOL
     appVerificationDisabledForTesting;
 
 @end
+
+NS_ASSUME_NONNULL_END

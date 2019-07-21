@@ -122,6 +122,27 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+#pragma mark - FSTNumericIncrementFieldValue
+
+/* FieldValue class for increment() transforms. */
+@interface FSTNumericIncrementFieldValue ()
+- (instancetype)initWithOperand:(NSNumber *)operand;
+@end
+
+@implementation FSTNumericIncrementFieldValue
+- (instancetype)initWithOperand:(NSNumber *)operand {
+  if (self = [super initPrivate]) {
+    _operand = operand;
+  }
+  return self;
+}
+
+- (NSString *)methodName {
+  return @"FieldValue.increment()";
+}
+
+@end
+
 #pragma mark - FIRFieldValue
 
 @implementation FIRFieldValue
@@ -145,6 +166,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (instancetype)fieldValueForArrayRemove:(NSArray<id> *)elements {
   return [[FSTArrayRemoveFieldValue alloc] initWithElements:elements];
+}
+
++ (instancetype)fieldValueForDoubleIncrement:(double)d {
+  return [[FSTNumericIncrementFieldValue alloc] initWithOperand:@(d)];
+}
+
++ (instancetype)fieldValueForIntegerIncrement:(int64_t)l {
+  return [[FSTNumericIncrementFieldValue alloc] initWithOperand:@(l)];
 }
 
 @end
