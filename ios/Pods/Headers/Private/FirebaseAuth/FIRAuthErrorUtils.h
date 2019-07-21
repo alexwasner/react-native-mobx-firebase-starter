@@ -1,1 +1,1 @@
-../../../FirebaseAuth/Firebase/Auth/Source/FIRAuthErrorUtils.h
+../../../FirebaseAuth/Firebase/Auth/Source/Utilities/FIRAuthErrorUtils.h

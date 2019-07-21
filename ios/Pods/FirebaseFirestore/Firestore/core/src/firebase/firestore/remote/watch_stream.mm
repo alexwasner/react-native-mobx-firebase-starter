@@ -16,10 +16,11 @@
 
 #include "Firestore/core/src/firebase/firestore/remote/watch_stream.h"
 
+#include "Firestore/core/src/firebase/firestore/util/hard_assert.h"
 #include "Firestore/core/src/firebase/firestore/util/log.h"
 #include "Firestore/core/src/firebase/firestore/util/status.h"
 
-#import "Firestore/Protos/objc/google/firestore/v1beta1/Firestore.pbobjc.h"
+#import "Firestore/Protos/objc/google/firestore/v1/Firestore.pbobjc.h"
 
 namespace firebase {
 namespace firestore {
@@ -32,15 +33,15 @@ using util::AsyncQueue;
 using util::TimerId;
 using util::Status;
 
-WatchStream::WatchStream(AsyncQueue* async_queue,
+WatchStream::WatchStream(const std::shared_ptr<AsyncQueue>& async_queue,
                          CredentialsProvider* credentials_provider,
                          FSTSerializerBeta* serializer,
                          GrpcConnection* grpc_connection,
-                         id<FSTWatchStreamDelegate> delegate)
+                         WatchStreamCallback* callback)
     : Stream{async_queue, credentials_provider, grpc_connection,
              TimerId::ListenStreamConnectionBackoff, TimerId::ListenStreamIdle},
       serializer_bridge_{serializer},
-      delegate_bridge_{delegate} {
+      callback_{NOT_NULL(callback)} {
 }
 
 void WatchStream::WatchQuery(FSTQueryData* query) {
@@ -64,8 +65,8 @@ void WatchStream::UnwatchTargetId(TargetId target_id) {
 
 std::unique_ptr<GrpcStream> WatchStream::CreateGrpcStream(
     GrpcConnection* grpc_connection, const Token& token) {
-  return grpc_connection->CreateStream(
-      "/google.firestore.v1beta1.Firestore/Listen", token, this);
+  return grpc_connection->CreateStream("/google.firestore.v1.Firestore/Listen",
+                                       token, this);
 }
 
 void WatchStream::TearDown(GrpcStream* grpc_stream) {
@@ -73,7 +74,7 @@ void WatchStream::TearDown(GrpcStream* grpc_stream) {
 }
 
 void WatchStream::NotifyStreamOpen() {
-  delegate_bridge_.NotifyDelegateOnOpen();
+  callback_->OnWatchStreamOpen();
 }
 
 Status WatchStream::NotifyStreamResponse(const grpc::ByteBuffer& message) {
@@ -84,20 +85,22 @@ Status WatchStream::NotifyStreamResponse(const grpc::ByteBuffer& message) {
     return status;
   }
 
-  LOG_DEBUG("%s response: %s", GetDebugDescription(),
-            serializer_bridge_.Describe(response));
+  if (bridge::IsLoggingEnabled()) {
+    LOG_DEBUG("%s response: %s", GetDebugDescription(),
+              serializer_bridge_.Describe(response));
+  }
 
   // A successful response means the stream is healthy.
   backoff_.Reset();
 
-  delegate_bridge_.NotifyDelegateOnChange(
-      serializer_bridge_.ToWatchChange(response),
+  callback_->OnWatchStreamChange(
+      *serializer_bridge_.ToWatchChange(response),
       serializer_bridge_.ToSnapshotVersion(response));
   return Status::OK();
 }
 
 void WatchStream::NotifyStreamClose(const Status& status) {
-  delegate_bridge_.NotifyDelegateOnClose(status);
+  callback_->OnWatchStreamClose(status);
 }
 
 }  // namespace remote

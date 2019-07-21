@@ -24,8 +24,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /** Project version string for FirebaseStorage. */
-FOUNDATION_EXPORT const unsigned char *const FIRStorageVersionString
-    NS_SWIFT_NAME(StorageVersionString);
+FOUNDATION_EXPORT const char *const FIRStorageVersionString NS_SWIFT_NAME(StorageVersionString);
 
 /**
  * FirebaseStorage is a service that supports uploading and downloading binary objects,
@@ -69,6 +68,8 @@ NS_SWIFT_NAME(Storage)
  * @return the FIRStorage instance, initialized with the custom FIRApp.
  */
 + (instancetype)storageForApp:(FIRApp *)app URL:(NSString *)url NS_SWIFT_NAME(storage(app:url:));
+
+- (instancetype)init NS_UNAVAILABLE;
 
 /**
  * The Firebase App associated with this Firebase Storage instance.

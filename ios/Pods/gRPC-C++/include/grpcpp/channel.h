@@ -19,59 +19,18 @@
 #ifndef GRPCPP_CHANNEL_H
 #define GRPCPP_CHANNEL_H
 
-#include <memory>
-
-#include <grpc/grpc.h>
-#include <grpcpp/impl/call.h>
-#include <grpcpp/impl/codegen/channel_interface.h>
-#include <grpcpp/impl/codegen/config.h>
-#include <grpcpp/impl/codegen/grpc_library.h>
-
-struct grpc_channel;
+#include <grpcpp/channel_impl.h>
 
 namespace grpc {
-/// Channels represent a connection to an endpoint. Created by \a CreateChannel.
-class Channel final : public ChannelInterface,
-                      public internal::CallHook,
-                      public std::enable_shared_from_this<Channel>,
-                      private GrpcLibraryCodegen {
- public:
-  ~Channel();
 
-  /// Get the current channel state. If the channel is in IDLE and
-  /// \a try_to_connect is set to true, try to connect.
-  grpc_connectivity_state GetState(bool try_to_connect) override;
+typedef ::grpc_impl::Channel Channel;
 
-  /// Returns the LB policy name, or the empty string if not yet available.
-  grpc::string GetLoadBalancingPolicyName() const;
-
-  /// Returns the service config in JSON form, or the empty string if
-  /// not available.
-  grpc::string GetServiceConfigJSON() const;
-
- private:
-  template <class InputMessage, class OutputMessage>
-  friend class internal::BlockingUnaryCallImpl;
-  friend std::shared_ptr<Channel> CreateChannelInternal(
-      const grpc::string& host, grpc_channel* c_channel);
-  Channel(const grpc::string& host, grpc_channel* c_channel);
-
-  internal::Call CreateCall(const internal::RpcMethod& method,
-                            ClientContext* context,
-                            CompletionQueue* cq) override;
-  void PerformOpsOnCall(internal::CallOpSetInterface* ops,
-                        internal::Call* call) override;
-  void* RegisterMethod(const char* method) override;
-
-  void NotifyOnStateChangeImpl(grpc_connectivity_state last_observed,
-                               gpr_timespec deadline, CompletionQueue* cq,
-                               void* tag) override;
-  bool WaitForStateChangeImpl(grpc_connectivity_state last_observed,
-                              gpr_timespec deadline) override;
-
-  const grpc::string host_;
-  grpc_channel* const c_channel_;  // owned
-};
+namespace experimental {
+/// Resets the channel's connection backoff.
+/// TODO(roth): Once we see whether this proves useful, either create a gRFC
+/// and change this to be a method of the Channel class, or remove it.
+void ChannelResetConnectionBackoff(Channel* channel);
+}  // namespace experimental
 
 }  // namespace grpc
 

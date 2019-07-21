@@ -1,1 +1,1 @@
-../../../FirebaseAuth/Firebase/Auth/Source/FIRAuthAppCredential.h
+../../../FirebaseAuth/Firebase/Auth/Source/SystemService/FIRAuthAppCredential.h

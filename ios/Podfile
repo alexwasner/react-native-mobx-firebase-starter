@@ -22,8 +22,6 @@ target 'ReactNativeMobxFirebaseStarter' do
   pod 'yoga', path: "../node_modules/react-native/ReactCommon/yoga/yoga.podspec"
   pod 'React', path: "../node_modules/react-native", subspecs: [
     'Core',
-    'jschelpers',
-    'cxxreact',
     'CxxBridge',
     'DevSupport',
     'RCTActionSheet',
