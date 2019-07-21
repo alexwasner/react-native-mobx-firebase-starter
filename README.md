@@ -3,7 +3,7 @@
   React Native Navigation + Firebase + MobX + Other Goodies
 </h1>
 
-A React Native starter app with Wix React Native Navigation V2, MobX and Firebase
+A React Native starter app with Wix React Native Navigation V2, MobX, Lottie, Firebase and more...
 
 Architecture includes navigation, registering and login with Firebase, Lottie animations and some default packages I tend to use.
 
