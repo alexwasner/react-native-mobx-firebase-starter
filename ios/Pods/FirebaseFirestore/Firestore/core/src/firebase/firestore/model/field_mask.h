@@ -18,16 +18,17 @@
 #define FIRESTORE_CORE_SRC_FIREBASE_FIRESTORE_MODEL_FIELD_MASK_H_
 
 #include <initializer_list>
+#include <set>
 #include <string>
 #include <utility>
-#include <vector>
 
 #include "Firestore/core/src/firebase/firestore/model/field_path.h"
-#include "Firestore/core/src/firebase/firestore/util/hashing.h"
 
 namespace firebase {
 namespace firestore {
 namespace model {
+
+class ObjectValue;
 
 /**
  * Provides a set of fields that can be used to partially patch a document.
@@ -41,12 +42,17 @@ namespace model {
  */
 class FieldMask {
  public:
-  using const_iterator = std::vector<FieldPath>::const_iterator;
+  using const_iterator = std::set<FieldPath>::const_iterator;
 
   FieldMask(std::initializer_list<FieldPath> list) : fields_{list} {
   }
-  explicit FieldMask(std::vector<FieldPath> fields)
-      : fields_{std::move(fields)} {
+  template <class InputIt>
+  FieldMask(InputIt first, InputIt last) : fields_{first, last} {
+  }
+  explicit FieldMask(std::set<FieldPath> fields) : fields_{std::move(fields)} {
+  }
+
+  FieldMask(const FieldMask& f) : fields_{f.begin(), f.end()} {
   }
 
   const_iterator begin() const {
@@ -56,45 +62,31 @@ class FieldMask {
     return fields_.end();
   }
 
+  size_t size() const {
+    return fields_.size();
+  }
+
   /**
    * Verifies that `fieldPath` is included by at least one field in this field
    * mask.
    *
    * This is an O(n) operation, where `n` is the size of the field mask.
    */
-  bool covers(const FieldPath& fieldPath) const {
-    for (const FieldPath& fieldMaskPath : fields_) {
-      if (fieldMaskPath.IsPrefixOf(fieldPath)) {
-        return true;
-      }
-    }
+  bool covers(const FieldPath& fieldPath) const;
 
-    return false;
-  }
-
-  std::string ToString() const {
-    // Ideally, one should use a string builder. Since this is only non-critical
-    // code for logging and debugging, the logic is kept simple here.
-    std::string result("{ ");
-    for (const FieldPath& field : fields_) {
-      result += field.CanonicalString() + " ";
-    }
-    return result + "}";
-  }
+  std::string ToString() const;
 
 #if defined(__OBJC__)
   FieldMask() {
   }
-
-  NSUInteger Hash() const {
-    return util::Hash(fields_);
-  }
 #endif
+
+  size_t Hash() const;
 
   friend bool operator==(const FieldMask& lhs, const FieldMask& rhs);
 
  private:
-  std::vector<FieldPath> fields_;
+  std::set<FieldPath> fields_;
 };
 
 inline bool operator==(const FieldMask& lhs, const FieldMask& rhs) {

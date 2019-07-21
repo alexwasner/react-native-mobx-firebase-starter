@@ -16,12 +16,21 @@
 
 #import "FIRTransaction.h"
 
+#include <memory>
+
+#include "Firestore/core/src/firebase/firestore/core/transaction.h"
+
 @class FIRFirestore;
-@class FSTTransaction;
+
+namespace core = firebase::firestore::core;
+
+NS_ASSUME_NONNULL_BEGIN
 
 @interface FIRTransaction (Internal)
 
-+ (instancetype)transactionWithFSTTransaction:(FSTTransaction *)transaction
-                                    firestore:(FIRFirestore *)firestore;
++ (instancetype)transactionWithInternalTransaction:(std::shared_ptr<core::Transaction>)transaction
+                                         firestore:(FIRFirestore *)firestore;
 
 @end
+
+NS_ASSUME_NONNULL_END

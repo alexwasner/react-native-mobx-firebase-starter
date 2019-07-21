@@ -16,10 +16,9 @@
 
 #import <Foundation/Foundation.h>
 
-NS_ASSUME_NONNULL_BEGIN
-
 @class FSTMaybeDocument;
-@class FSTTransaction;
+
+NS_ASSUME_NONNULL_BEGIN
 
 /**
  * FSTVoidBlock is a block that's called when a specific event happens but that otherwise has
@@ -34,9 +33,6 @@ typedef void (^FSTVoidBlock)(void);
  */
 typedef void (^FSTVoidErrorBlock)(NSError *_Nullable error);
 
-/** FSTVoidIDErrorBlock is a block that takes an optional value and error. */
-typedef void (^FSTVoidIDErrorBlock)(id _Nullable, NSError *_Nullable);
-
 /**
  * FSTVoidMaybeDocumentErrorBlock is a block that gets either a list of documents or an error.
  *
@@ -45,15 +41,5 @@ typedef void (^FSTVoidIDErrorBlock)(id _Nullable, NSError *_Nullable);
  */
 typedef void (^FSTVoidMaybeDocumentArrayErrorBlock)(
     NSArray<FSTMaybeDocument *> *_Nullable documents, NSError *_Nullable error);
-
-/**
- * FSTTransactionBlock is a block that wraps a user's transaction update block internally.
- *
- * @param transaction An object with methods for performing reads and writes within the
- *                    transaction.
- * @param completion To be called by the block once the user's code is finished.
- */
-typedef void (^FSTTransactionBlock)(FSTTransaction *transaction,
-                                    void (^completion)(id _Nullable, NSError *_Nullable));
 
 NS_ASSUME_NONNULL_END

@@ -36,22 +36,11 @@ extern NSString *const FIREmailLinkAuthSignInMethod NS_SWIFT_NAME(EmailLinkAuthS
 extern NSString *const FIREmailPasswordAuthSignInMethod
     NS_SWIFT_NAME(EmailPasswordAuthSignInMethod);
 
-/**
-    @brief Please use `FIREmailAuthProviderID` for Objective-C or `EmailAuthProviderID` for Swift instead.
- */
-extern NSString *const FIREmailPasswordAuthProviderID __attribute__((deprecated));
-
 /** @class FIREmailAuthProvider
     @brief A concrete implementation of `FIRAuthProvider` for Email & Password Sign In.
  */
 NS_SWIFT_NAME(EmailAuthProvider)
 @interface FIREmailAuthProvider : NSObject
-
-/** @typedef FIREmailPasswordAuthProvider
-    @brief Please use `FIREmailAuthProvider` instead.
- */
-typedef FIREmailAuthProvider FIREmailPasswordAuthProvider __attribute__((deprecated));
-
 
 /** @fn credentialWithEmail:password:
     @brief Creates an `FIRAuthCredential` for an email & password sign in.

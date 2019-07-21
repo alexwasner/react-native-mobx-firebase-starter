@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <utility>
 
+#include "Firestore/core/src/firebase/firestore/api/input_validation.h"
 #include "Firestore/core/src/firebase/firestore/util/hard_assert.h"
 #include "absl/strings/str_join.h"
 #include "absl/strings/str_replace.h"
@@ -27,6 +28,8 @@
 namespace firebase {
 namespace firestore {
 namespace model {
+
+using api::ThrowInvalidArgument;
 
 namespace {
 
@@ -78,12 +81,29 @@ struct JoinEscaped {
 };
 }  // namespace
 
-FieldPath FieldPath::FromServerFormat(const absl::string_view path) {
-  // TODO(b/37244157): Once we move to v1beta1, we should make this more
-  // strict. Right now, it allows non-identifier path components, even if they
-  // aren't escaped. Technically, this will mangle paths with backticks in
-  // them used in v1alpha1, but that's fine.
+FieldPath FieldPath::FromDotSeparatedString(absl::string_view path) {
+  if (path.find_first_of("~*/[]") != absl::string_view::npos) {
+    ThrowInvalidArgument(
+        "Invalid field path (%s). Paths must not contain '~', '*', '/', '[', "
+        "or ']'",
+        path);
+  }
 
+  SegmentsT segments =
+      absl::StrSplit(path, '.', [path](absl::string_view segment) {
+        if (segment.empty()) {
+          ThrowInvalidArgument(
+              "Invalid field path (%s). Paths must not be empty, begin with "
+              "'.', end with '.', or contain '..'",
+              path);
+        }
+        return true;
+      });
+
+  return FieldPath(std::move(segments));
+}
+
+FieldPath FieldPath::FromServerFormat(const absl::string_view path) {
   SegmentsT segments;
   std::string segment;
   segment.reserve(path.size());
@@ -124,8 +144,6 @@ FieldPath FieldPath::FromServerFormat(const absl::string_view path) {
         break;
 
       case '\\':
-        // TODO(b/37244157): Make this a user-facing exception once we
-        // finalize field escaping.
         HARD_ASSERT(i + 1 != path.size(),
                     "Trailing escape characters not allowed in %s", path);
         ++i;

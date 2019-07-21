@@ -26,9 +26,14 @@
 #include "Firestore/core/src/firebase/firestore/local/leveldb_transaction.h"
 #include "Firestore/core/src/firebase/firestore/util/path.h"
 #include "Firestore/core/src/firebase/firestore/util/status.h"
+#include "Firestore/core/src/firebase/firestore/util/statusor.h"
 #include "leveldb/db.h"
 
 @class FSTLocalSerializer;
+
+namespace core = firebase::firestore::core;
+namespace local = firebase::firestore::local;
+namespace util = firebase::firestore::util;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -40,18 +45,20 @@ NS_ASSUME_NONNULL_BEGIN
 @interface FSTLevelDB : NSObject <FSTPersistence, FSTTransactional>
 
 /**
- * Initializes the LevelDB in the given directory. Note that all expensive startup work including
- * opening any database files is deferred until -[FSTPersistence start] is called.
+ * Creates a LevelDB in the given directory and sets `ptr` to point to it. Return value indicates
+ * success in creating the leveldb instance and must be checked before accessing `ptr`. C++ note:
+ * Once FSTLevelDB is ported to C++, this factory method should return StatusOr<>. It cannot
+ * currently do that because ObjC references are not allowed in StatusOr.
  */
-- (instancetype)initWithDirectory:(firebase::firestore::util::Path)directory
-                       serializer:(FSTLocalSerializer *)serializer
-                        lruParams:(firebase::firestore::local::LruParams)lruParams
-    NS_DESIGNATED_INITIALIZER;
++ (util::Status)dbWithDirectory:(util::Path)directory
+                     serializer:(FSTLocalSerializer *)serializer
+                      lruParams:(local::LruParams)lruParams
+                            ptr:(FSTLevelDB *_Nullable *_Nonnull)ptr;
 
 - (instancetype)init NS_UNAVAILABLE;
 
 /** Finds a suitable directory to serve as the root of all Firestore local storage. */
-+ (firebase::firestore::util::Path)documentsDirectory;
++ (util::Path)documentsDirectory;
 
 /**
  * Computes a unique storage directory for the given identifying components of local storage.
@@ -61,32 +68,26 @@ NS_ASSUME_NONNULL_BEGIN
  *     will be created. Usually just +[FSTLevelDB documentsDir].
  * @return A storage directory unique to the instance identified by databaseInfo.
  */
-+ (firebase::firestore::util::Path)
-    storageDirectoryForDatabaseInfo:(const firebase::firestore::core::DatabaseInfo &)databaseInfo
-                 documentsDirectory:(const firebase::firestore::util::Path &)documentsDirectory;
-
-/**
- * Starts LevelDB-backed persistent storage by opening the database files, creating the DB if it
- * does not exist.
- *
- * The leveldb directory is created relative to the appropriate document storage directory for the
- * platform: NSDocumentDirectory on iOS or $HOME/.firestore on macOS.
- */
-- (firebase::firestore::util::Status)start;
++ (util::Path)storageDirectoryForDatabaseInfo:(const core::DatabaseInfo &)databaseInfo
+                           documentsDirectory:(const util::Path &)documentsDirectory;
 
 /**
  * @return A standard set of read options
  */
 + (const leveldb::ReadOptions)standardReadOptions;
 
++ (util::Status)clearPersistence:(const core::DatabaseInfo &)databaseInfo;
+
 /** The native db pointer, allocated during start. */
 @property(nonatomic, assign, readonly) leveldb::DB *ptr;
 
-@property(nonatomic, readonly) firebase::firestore::local::LevelDbTransaction *currentTransaction;
+@property(nonatomic, readonly) local::LevelDbTransaction *currentTransaction;
 
 @property(nonatomic, readonly) const std::set<std::string> &users;
 
 @property(nonatomic, readonly, strong) FSTLevelDBLRUDelegate *referenceDelegate;
+
+@property(nonatomic, readonly, strong) FSTLocalSerializer *serializer;
 
 @end
 

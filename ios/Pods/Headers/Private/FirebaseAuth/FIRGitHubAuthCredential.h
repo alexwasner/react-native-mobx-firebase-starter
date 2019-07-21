@@ -1,1 +1,1 @@
-../../../FirebaseAuth/Firebase/Auth/Source/AuthProviders/GitHub/FIRGitHubAuthCredential.h
+../../../FirebaseAuth/Firebase/Auth/Source/AuthProvider/GitHub/FIRGitHubAuthCredential.h

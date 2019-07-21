@@ -21,34 +21,47 @@
 #include <unordered_set>
 #include <vector>
 
-#import "Firestore/Source/Core/FSTListenSequence.h"
-#import "Firestore/Source/Local/FSTMemoryMutationQueue.h"
-#import "Firestore/Source/Local/FSTMemoryQueryCache.h"
-#import "Firestore/Source/Local/FSTMemoryRemoteDocumentCache.h"
-#import "Firestore/Source/Local/FSTReferenceSet.h"
-#include "absl/memory/memory.h"
-
 #include "Firestore/core/src/firebase/firestore/auth/user.h"
+#include "Firestore/core/src/firebase/firestore/local/index_manager.h"
+#include "Firestore/core/src/firebase/firestore/local/listen_sequence.h"
+#include "Firestore/core/src/firebase/firestore/local/memory_index_manager.h"
+#include "Firestore/core/src/firebase/firestore/local/memory_mutation_queue.h"
+#include "Firestore/core/src/firebase/firestore/local/memory_query_cache.h"
+#include "Firestore/core/src/firebase/firestore/local/memory_remote_document_cache.h"
+#include "Firestore/core/src/firebase/firestore/local/reference_set.h"
 #include "Firestore/core/src/firebase/firestore/model/document_key.h"
 #include "Firestore/core/src/firebase/firestore/util/hard_assert.h"
+#include "absl/memory/memory.h"
 
 using firebase::firestore::auth::HashUser;
 using firebase::firestore::auth::User;
+using firebase::firestore::local::ListenSequence;
 using firebase::firestore::local::LruParams;
+using firebase::firestore::local::MemoryIndexManager;
+using firebase::firestore::local::MemoryMutationQueue;
+using firebase::firestore::local::MemoryQueryCache;
+using firebase::firestore::local::MemoryRemoteDocumentCache;
+using firebase::firestore::local::ReferenceSet;
+using firebase::firestore::local::TargetCallback;
 using firebase::firestore::model::DocumentKey;
 using firebase::firestore::model::DocumentKeyHash;
 using firebase::firestore::model::ListenSequenceNumber;
+using firebase::firestore::model::TargetId;
 using firebase::firestore::util::Status;
 
-using MutationQueues = std::unordered_map<User, FSTMemoryMutationQueue *, HashUser>;
+using MutationQueues = std::unordered_map<User, std::unique_ptr<MemoryMutationQueue>, HashUser>;
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface FSTMemoryPersistence ()
 
-- (FSTMemoryQueryCache *)queryCache;
+- (MemoryQueryCache *)queryCache;
 
-- (FSTMemoryRemoteDocumentCache *)remoteDocumentCache;
+- (MemoryRemoteDocumentCache *)remoteDocumentCache;
+
+- (MemoryIndexManager *)indexManager;
+
+- (MemoryMutationQueue *)mutationQueueForUser:(const User &)user;
 
 @property(nonatomic, readonly) MutationQueues &mutationQueues;
 
@@ -61,17 +74,19 @@ NS_ASSUME_NONNULL_BEGIN
 
 @implementation FSTMemoryPersistence {
   /**
-   * The FSTQueryCache representing the persisted cache of queries.
+   * The QueryCache representing the persisted cache of queries.
    *
    * Note that this is retained here to make it easier to write tests affecting both the in-memory
    * and LevelDB-backed persistence layers. Tests can create a new FSTLocalStore wrapping this
    * FSTPersistence instance and this will make the in-memory persistence layer behave as if it
    * were actually persisting values.
    */
-  FSTMemoryQueryCache *_queryCache;
+  std::unique_ptr<MemoryQueryCache> _queryCache;
 
-  /** The FSTRemoteDocumentCache representing the persisted cache of remote documents. */
-  FSTMemoryRemoteDocumentCache *_remoteDocumentCache;
+  /** The RemoteDocumentCache representing the persisted cache of remote documents. */
+  std::unique_ptr<MemoryRemoteDocumentCache> _remoteDocumentCache;
+
+  MemoryIndexManager _indexManager;
 
   FSTTransactionRunner _transactionRunner;
 
@@ -97,8 +112,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)init {
   if (self = [super init]) {
-    _queryCache = [[FSTMemoryQueryCache alloc] initWithPersistence:self];
-    _remoteDocumentCache = [[FSTMemoryRemoteDocumentCache alloc] init];
+    _queryCache = absl::make_unique<MemoryQueryCache>(self);
+    _remoteDocumentCache = absl::make_unique<MemoryRemoteDocumentCache>(self);
+    self.started = YES;
   }
   return self;
 }
@@ -109,13 +125,6 @@ NS_ASSUME_NONNULL_BEGIN
   if ([delegate conformsToProtocol:@protocol(FSTTransactional)]) {
     _transactionRunner.SetBackingPersistence((id<FSTTransactional>)_referenceDelegate);
   }
-}
-
-- (Status)start {
-  // No durable state to read on startup.
-  HARD_ASSERT(!self.isStarted, "FSTMemoryPersistence double-started!");
-  self.started = YES;
-  return Status::OK();
 }
 
 - (void)shutdown {
@@ -136,21 +145,26 @@ NS_ASSUME_NONNULL_BEGIN
   return _transactionRunner;
 }
 
-- (id<FSTMutationQueue>)mutationQueueForUser:(const User &)user {
-  id<FSTMutationQueue> queue = _mutationQueues[user];
-  if (!queue) {
-    queue = [[FSTMemoryMutationQueue alloc] initWithPersistence:self];
-    _mutationQueues[user] = queue;
+- (MemoryMutationQueue *)mutationQueueForUser:(const User &)user {
+  const std::unique_ptr<MemoryMutationQueue> &existing = _mutationQueues[user];
+  if (!existing) {
+    _mutationQueues[user] = absl::make_unique<MemoryMutationQueue>(self);
+    return _mutationQueues[user].get();
+  } else {
+    return existing.get();
   }
-  return queue;
 }
 
-- (FSTMemoryQueryCache *)queryCache {
-  return _queryCache;
+- (MemoryQueryCache *)queryCache {
+  return _queryCache.get();
 }
 
-- (id<FSTRemoteDocumentCache>)remoteDocumentCache {
-  return _remoteDocumentCache;
+- (MemoryRemoteDocumentCache *)remoteDocumentCache {
+  return _remoteDocumentCache.get();
+}
+
+- (MemoryIndexManager *)indexManager {
+  return &_indexManager;
 }
 
 @end
@@ -162,9 +176,10 @@ NS_ASSUME_NONNULL_BEGIN
   // Tracks sequence numbers of when documents are used. Equivalent to sentinel rows in
   // the leveldb implementation.
   std::unordered_map<DocumentKey, ListenSequenceNumber, DocumentKeyHash> _sequenceNumbers;
-  FSTReferenceSet *_additionalReferences;
+  ReferenceSet *_additionalReferences;
   FSTLRUGarbageCollector *_gc;
-  FSTListenSequence *_listenSequence;
+  // PORTING NOTE: when this class is ported to C++, this does not need to be a pointer
+  std::unique_ptr<ListenSequence> _listenSequence;
   ListenSequenceNumber _currentSequenceNumber;
   FSTLocalSerializer *_serializer;
 }
@@ -178,8 +193,8 @@ NS_ASSUME_NONNULL_BEGIN
     _currentSequenceNumber = kFSTListenSequenceNumberInvalid;
     // Theoretically this is always 0, since this is all in-memory...
     ListenSequenceNumber highestSequenceNumber =
-        _persistence.queryCache.highestListenSequenceNumber;
-    _listenSequence = [[FSTListenSequence alloc] initStartingAfter:highestSequenceNumber];
+        _persistence.queryCache->highest_listen_sequence_number();
+    _listenSequence = absl::make_unique<ListenSequence>(highestSequenceNumber);
     _serializer = serializer;
   }
   return self;
@@ -195,7 +210,7 @@ NS_ASSUME_NONNULL_BEGIN
   return _currentSequenceNumber;
 }
 
-- (void)addInMemoryPins:(FSTReferenceSet *)set {
+- (void)addInMemoryPins:(ReferenceSet *)set {
   // Technically can't assert this, due to restartWithNoopGarbageCollector (for now...)
   // FSTAssert(_additionalReferences == nil, @"Overwriting additional references");
   _additionalReferences = set;
@@ -205,7 +220,7 @@ NS_ASSUME_NONNULL_BEGIN
   FSTQueryData *updated = [queryData queryDataByReplacingSnapshotVersion:queryData.snapshotVersion
                                                              resumeToken:queryData.resumeToken
                                                           sequenceNumber:_currentSequenceNumber];
-  [_persistence.queryCache updateQueryData:updated];
+  _persistence.queryCache->UpdateTarget(updated);
 }
 
 - (void)limboDocumentUpdated:(const DocumentKey &)key {
@@ -213,41 +228,40 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (void)startTransaction:(absl::string_view)label {
-  _currentSequenceNumber = [_listenSequence next];
+  _currentSequenceNumber = _listenSequence->Next();
 }
 
 - (void)commitTransaction {
   _currentSequenceNumber = kFSTListenSequenceNumberInvalid;
 }
 
-- (void)enumerateTargetsUsingBlock:(void (^)(FSTQueryData *queryData, BOOL *stop))block {
-  return [_persistence.queryCache enumerateTargetsUsingBlock:block];
+- (void)enumerateTargetsUsingCallback:(const TargetCallback &)callback {
+  return _persistence.queryCache->EnumerateTargets(callback);
 }
 
-- (void)enumerateMutationsUsingBlock:
-    (void (^)(const DocumentKey &key, ListenSequenceNumber sequenceNumber, BOOL *stop))block {
-  BOOL stop = NO;
+- (void)enumerateMutationsUsingCallback:
+    (const firebase::firestore::local::OrphanedDocumentCallback &)callback {
   for (const auto &entry : _sequenceNumbers) {
     ListenSequenceNumber sequenceNumber = entry.second;
     const DocumentKey &key = entry.first;
     // Pass in the exact sequence number as the upper bound so we know it won't be pinned by being
     // too recent.
     if (![self isPinnedAtSequenceNumber:sequenceNumber document:key]) {
-      block(key, sequenceNumber, &stop);
+      callback(key, sequenceNumber);
     }
   }
 }
 
 - (int)removeTargetsThroughSequenceNumber:(ListenSequenceNumber)sequenceNumber
-                              liveQueries:(NSDictionary<NSNumber *, FSTQueryData *> *)liveQueries {
-  return [_persistence.queryCache removeQueriesThroughSequenceNumber:sequenceNumber
-                                                         liveQueries:liveQueries];
+                              liveQueries:(const std::unordered_map<TargetId, FSTQueryData *> &)
+                                              liveQueries {
+  return _persistence.queryCache->RemoveTargets(sequenceNumber, liveQueries);
 }
 
-- (int32_t)sequenceNumberCount {
-  __block int32_t totalCount = [_persistence.queryCache count];
-  [self enumerateMutationsUsingBlock:^(const DocumentKey &key, ListenSequenceNumber sequenceNumber,
-                                       BOOL *stop) {
+- (size_t)sequenceNumberCount {
+  size_t totalCount = _persistence.queryCache->size();
+  [self enumerateMutationsUsingCallback:[&totalCount](const DocumentKey &key,
+                                                      ListenSequenceNumber sequenceNumber) {
     totalCount++;
   }];
   return totalCount;
@@ -255,9 +269,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (int)removeOrphanedDocumentsThroughSequenceNumber:(ListenSequenceNumber)upperBound {
   std::vector<DocumentKey> removed =
-      [(FSTMemoryRemoteDocumentCache *)_persistence.remoteDocumentCache
-          removeOrphanedDocuments:self
-            throughSequenceNumber:upperBound];
+      _persistence.remoteDocumentCache->RemoveOrphanedDocuments(self, upperBound);
   for (const auto &key : removed) {
     _sequenceNumbers.erase(key);
   }
@@ -275,7 +287,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)mutationQueuesContainKey:(const DocumentKey &)key {
   const MutationQueues &queues = [_persistence mutationQueues];
   for (const auto &entry : queues) {
-    if ([entry.second containsKey:key]) {
+    if (entry.second->ContainsKey(key)) {
       return YES;
     }
   }
@@ -291,10 +303,10 @@ NS_ASSUME_NONNULL_BEGIN
   if ([self mutationQueuesContainKey:key]) {
     return YES;
   }
-  if ([_additionalReferences containsKey:key]) {
+  if (_additionalReferences->ContainsKey(key)) {
     return YES;
   }
-  if ([_persistence.queryCache containsKey:key]) {
+  if (_persistence.queryCache->Contains(key)) {
     return YES;
   }
   auto it = _sequenceNumbers.find(key);
@@ -309,11 +321,11 @@ NS_ASSUME_NONNULL_BEGIN
   // used for testing. The algorithm here (loop through everything, serialize it
   // and count bytes) is inefficient and inexact, but won't run in production.
   size_t count = 0;
-  count += [_persistence.queryCache byteSizeWithSerializer:_serializer];
-  count += [_persistence.remoteDocumentCache byteSizeWithSerializer:_serializer];
+  count += _persistence.queryCache->CalculateByteSize(_serializer);
+  count += _persistence.remoteDocumentCache->CalculateByteSize(_serializer);
   const MutationQueues &queues = [_persistence mutationQueues];
   for (const auto &entry : queues) {
-    count += [entry.second byteSizeWithSerializer:_serializer];
+    count += entry.second->CalculateByteSize(_serializer);
   }
   return count;
 }
@@ -325,7 +337,7 @@ NS_ASSUME_NONNULL_BEGIN
   // This delegate should have the same lifetime as the persistence layer, but mark as
   // weak to avoid retain cycle.
   __weak FSTMemoryPersistence *_persistence;
-  FSTReferenceSet *_additionalReferences;
+  ReferenceSet *_additionalReferences;
 }
 
 - (instancetype)initWithPersistence:(FSTMemoryPersistence *)persistence {
@@ -339,18 +351,17 @@ NS_ASSUME_NONNULL_BEGIN
   return kFSTListenSequenceNumberInvalid;
 }
 
-- (void)addInMemoryPins:(FSTReferenceSet *)set {
+- (void)addInMemoryPins:(ReferenceSet *)set {
   // We should be able to assert that _additionalReferences is nil, but due to restarts in spec
   // tests it would fail.
   _additionalReferences = set;
 }
 
 - (void)removeTarget:(FSTQueryData *)queryData {
-  for (const DocumentKey &docKey :
-       [_persistence.queryCache matchingKeysForTargetID:queryData.targetID]) {
+  for (const DocumentKey &docKey : _persistence.queryCache->GetMatchingKeys(queryData.targetID)) {
     _orphaned->insert(docKey);
   }
-  [_persistence.queryCache removeQueryData:queryData];
+  _persistence.queryCache->RemoveTarget(queryData);
 }
 
 - (void)addReference:(const DocumentKey &)key {
@@ -366,13 +377,13 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (BOOL)isReferenced:(const DocumentKey &)key {
-  if ([[_persistence queryCache] containsKey:key]) {
+  if (_persistence.queryCache->Contains(key)) {
     return YES;
   }
   if ([self mutationQueuesContainKey:key]) {
     return YES;
   }
-  if ([_additionalReferences containsKey:key]) {
+  if (_additionalReferences->ContainsKey(key)) {
     return YES;
   }
   return NO;
@@ -393,7 +404,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)mutationQueuesContainKey:(const DocumentKey &)key {
   const MutationQueues &queues = [_persistence mutationQueues];
   for (const auto &entry : queues) {
-    if ([entry.second containsKey:key]) {
+    if (entry.second->ContainsKey(key)) {
       return YES;
     }
   }
@@ -403,7 +414,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)commitTransaction {
   for (const auto &key : *_orphaned) {
     if (![self isReferenced:key]) {
-      [[_persistence remoteDocumentCache] removeEntryForKey:key];
+      _persistence.remoteDocumentCache->Remove(key);
     }
   }
   _orphaned.reset();

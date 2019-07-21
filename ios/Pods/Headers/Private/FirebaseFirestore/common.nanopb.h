@@ -1,1 +1,1 @@
-../../../FirebaseFirestore/Firestore/Protos/nanopb/google/firestore/v1beta1/common.nanopb.h
+../../../FirebaseFirestore/Firestore/Protos/nanopb/google/firestore/v1/common.nanopb.h

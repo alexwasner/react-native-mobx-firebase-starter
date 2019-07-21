@@ -1,1 +1,1 @@
-../../../FirebaseFirestore/Firestore/Protos/objc/google/firestore/v1beta1/Common.pbobjc.h
+../../../FirebaseFirestore/Firestore/Protos/objc/google/firestore/v1/Common.pbobjc.h
