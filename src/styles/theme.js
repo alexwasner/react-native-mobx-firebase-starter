@@ -6,17 +6,8 @@ function isIPhoneX() {
 }
 
 const padding = 20
-const safeTop = isIPhoneX() ? 34 : 22
-const safeBottom = isIPhoneX() ? 34 : 0
-const { width } = Dimensions.get('window')
 export const Images = images
 export const Icons = icons
-export const ScreenOffsets = {
-  top: safeTop,
-  left: 0,
-  bottom: safeBottom,
-  right: 0,
-}
 
 export default {
   backgroundColor: '#f5f4fc',
@@ -24,7 +15,7 @@ export default {
   grey: '#333745',
   linkColor: '#4b87a7',
   border: '#d3d8db',
-  padding:20,
+  padding: padding,
   cloudHeight:200,
   white:(percent)=>`rgba(255,255,255,${percent / 100})`,
   black:(percent)=>`rgba(0,0,0,${percent / 100})`,

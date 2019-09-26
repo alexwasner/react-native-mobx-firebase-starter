@@ -4,10 +4,10 @@ import {
   Easing,
   View
 } from 'react-native'
-import { Icons } from '../../styles'
+import { Icons } from '../../styles/theme'
 import Animation from 'lottie-react-native';
 import LOADER_JSON from '../../assets/lottie/loading-circle.json'
-import styles from '../../depstyles/theme/LoaderViewStyles'
+import styles from '../../styles/theme/LoaderViewStyles'
 
 export default class LoaderView extends Component {
   constructor(props) {
