@@ -23,7 +23,7 @@ Also includes a default [Firebase Cloud Function](https://firebase.google.com/do
 ## ✅ Setup  
 
 ### 🔥 Setup Firebase
-Create a new firebase project [here](https://console.firebase.google.com/) and set up an iOS or Android project with a bundleID. Download the cooresponding `plist` or `json` files.  
+Create a new firebase project [here](https://console.firebase.google.com/) and set up an iOS or Android project with a bundleID. Download the corresponding `plist` or `json` files.  
 
 🍎_**If building for iOS**_  
 Copy `GoogleService-Info.plist` to overwrite the placeholder file in the `ios` folder.
